@@ -10,7 +10,6 @@ var config = {
 
 var database = firebase.database();
 
-
 //Button for adding trains
 $("#add-train-btn").on("click", function(event) {
   event.preventDefault();
@@ -24,8 +23,7 @@ $("#add-train-btn").on("click", function(event) {
   var nextTrainAA = moment($(nextTrain, "HH:mm")).format("h:mm A");
 
 //  alert("train name " + trainName);
-    
-    
+
 	var newTrain = {
 		name:  trainName,
 		destination: trainDestination,
@@ -33,10 +31,16 @@ $("#add-train-btn").on("click", function(event) {
 		frequency: trainFrequency,
         nextTrain: nextTrain
 	};
-    
+ 
     database.ref().push(newTrain);
-    
-//Adding trains to FB
+
+//clear input boxes
+    $("#train-name-input").val("");
+    $("#destination-input").val("");
+    $("#first-train-time-input").val("");
+    $("#frequency-input").val("");  
+
+//adding trains to FB
     database.ref().on("child_added", function(childSnapshot, prevChildKey) {
     console.log(childSnapshot.val());
         
@@ -44,24 +48,32 @@ $("#add-train-btn").on("click", function(event) {
     var trainName = childSnapshot.val().name;
     var trainDestination = childSnapshot.val().destination;
     var trainFrequency = childSnapshot.val().frequency;
+    var firstTrain = childSnapshot.val().firstTrain;
         
-//TODO calculate Next Arrival and Minutes Away
+//calculate Next Arrival and Minutes Away
+    var diffInTimes = moment().diff(moment.firstTrain, "minutes");
+	var timeRemainder = moment().diff(moment.firstTrain, "minutes") % trainFrequency ;
+	var timeMin = trainFrequency - timeRemainder;
+    console.log(timeMin);
         
-
+//calculate Time of Arrival     
+    var timeOfArrival = moment().add(timeMin, "m").format("hh:mm A"); 
+    console.log(timeOfArrival);
         
 //add train's data into the table
-         
-    $("#train-table > tbody").append("<tr><td>" + trainName + "</td><td>" + trainDestination + "</td><td>" + trainFrequency + "</td><td>" );
-        
-        
-        
-        
-        
+    $("#train-table > tbody").append("<tr><td>" + trainName + "</td><td>" + trainDestination + "</td><td>" + trainFrequency + "</td><td>" + timeOfArrival + "</td><td>" + timeMin + "</td><td>");
     })
-    
-    
-    
-console.log(nextTrain); 
-console.log(nextTrainAA);
-    
 });
+
+
+    
+
+
+
+
+
+
+
+ 
+    
+    
